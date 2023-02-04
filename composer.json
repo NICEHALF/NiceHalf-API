@@ -1,0 +1,18 @@
+{
+    "name": "nicehalf/api",
+    "description": "Nicehalf API",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Nicehalf\\Api\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nicehalf Team"
+        }
+    ],
+    "require": {
+        "php": ">=8.0"
+    }
+}
