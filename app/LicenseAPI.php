@@ -52,7 +52,7 @@ define(
     'NICEHALF_TEXT_MAIN_UPDATE_DONE',
     'Main update files downloaded and extracted.'
 );
-define('NICEHALF_TEXT_UPDATE_EXTRACTION_ERROR', 'Update zip extraction failed.');
+define('NICEHALF_TEXT_UPDATE_EXTRACTION_ERROR', 'Update zip extraction failed. ');
 define('NICEHALF_TEXT_PREPARING_SQL_DOWNLOAD', 'Preparing to download SQL update...');
 define('NICEHALF_TEXT_SQL_UPDATE_SIZE', 'SQL Update size:');
 define('NICEHALF_TEXT_DOWNLOADING_SQL', 'Downloading SQL update...');
