@@ -12,9 +12,6 @@
 // Namespace
 namespace Nicehalf\Api;
 
-// Exit if accessed directly
-if (!defined('ABSPATH')) exit;
-
 // Auth API class
 class AuthAPI
 {
@@ -33,7 +30,6 @@ class AuthAPI
      */
     public function auth()
     {
-        // save the current page full url
         $current_page_url = $this->getCurrentPageURL();
 
         // save the current page url without query string if exists in session (for redirect after login)
@@ -41,18 +37,20 @@ class AuthAPI
             $_SESSION['current_page_url'] = $current_page_url;
         }
 
-        // redirect to login page if not logged in
-        if (!isset($_SESSION['nicehalf_auth_token'])) {
-            return $this->redirect($this->api_url . '?redirect=' . $current_page_url);
+        // Check if token is set
+        if (isset($_GET['token'])) {
+            // Check token
+            return $this->checkToken();
         }
 
-        // check if the token is valid
-        $this->checkToken();
-
-        // redirect to login page if not logged in
-        if (!isset($_SESSION['nicehalf_auth_token'])) {
-            return $this->redirect($this->api_url . '?redirect=' . $current_page_url);
+        // check if user is logged in
+        if (isset($_SESSION['nicehalf_auth_user'])) {
+            print_r($_SESSION['nicehalf_auth_user']);
+            return;
         }
+
+        // Redirect to login page
+        return $this->redirect($this->api_url . '?redirect=' . $current_page_url);
     }
 
     /**
@@ -83,11 +81,10 @@ class AuthAPI
 
         $pageURL .= "://";
 
-        if ($_SERVER["SERVER_PORT"] != "80") {
-            $pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"] . $_SERVER["REQUEST_URI"];
-        } else {
-            $pageURL .= $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
-        }
+        $pageURL .= $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+
+        // remove query string if exists
+        $pageURL = explode('?', $pageURL)[0];
 
         return $pageURL;
     }
@@ -101,7 +98,7 @@ class AuthAPI
     private function checkToken()
     {
         // Token
-        $token = isset($_GET['token']) ? $_GET['token'] : (isset($_SESSION['nicehalf_auth_token']) ? $_SESSION['nicehalf_auth_token'] : null);
+        $token = isset($_GET['token']) ? $_GET['token'] : null;
 
         // Check if token is not set
         if (!$token) {
@@ -109,81 +106,87 @@ class AuthAPI
             session_destroy();
 
             // Redirect to login page
-            $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
+            return $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
         }
 
         // Check token
-        $check_token = $this->apiRequest('check-token', ['token' => $token]);
+        $check_token = $this->verifyToken($token);
 
         // Check if token is valid
-        if (!$check_token['status']) {
+        if ($check_token['status'] != 'success') {
             // Destroy session
             session_destroy();
 
             // Redirect to login page
-            $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
+            return $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
         }
 
         // Save user data in session
         $_SESSION['nicehalf_auth_user'] = $check_token['user'];
 
-        // Save token in session
-        $_SESSION['nicehalf_auth_token'] = $check_token['token'];
-
         // redirect to current page url without query string if exists
         if (isset($_SESSION['current_page_url'])) {
-            $this->redirect($_SESSION['current_page_url']);
+            $url = $_SESSION['current_page_url'];
+            unset($_SESSION['current_page_url']);
+            return $this->redirect($url);
         }
 
-        // Unset current page url
-        unset($_SESSION['current_page_url']);
-
         // redirect to home page
-        $this->redirect('/');
+        return $this->redirect('/');
     }
 
     /**
-     * API Request
+     * Verify token
      * 
-     * @param string $endpoint
-     * @param array $data
-     * @return array
+     * @return void
      */
 
-    private function apiRequest($endpoint, $data = [])
+    public function verifyToken($token)
     {
-        // API URL
-        $api_url = $this->api_url . '/' . $endpoint;
+        $client = new \GuzzleHttp\Client();
 
-        // Data
-        $data = array_merge($data, ['app' => 'app']);
-
-        // Init curl
-        $curl = curl_init();
-
-        // Set curl options
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $api_url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_HTTPHEADER => [
-                "cache-control: no-cache",
-                "content-type: application/json"
+        $response = $client->request('GET', $this->api_url . '/verify-token/' . $token, [
+            'headers' => [
+                'Accept' => 'application/json',
             ],
+            'ssl.certificate_authority' => 'system',
+            'verify' => false,
+            'http_errors' => false,
+            'allow_redirects' => false,
+            'debug' => false,
         ]);
 
-        // Execute curl
-        $response = curl_exec($curl);
+        return json_decode($response->getBody(), true);
+    }
 
-        // Close curl
-        curl_close($curl);
+    /**
+     * Logout
+     * 
+     * @return void
+     */
 
-        // Return response
-        return json_decode($response, true);
+    public function logout()
+    {
+        // Destroy session
+        session_destroy();
+
+        // Redirect to login page
+        return $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
+    }
+
+    /**
+     * Get user
+     * 
+     * @return void
+     */
+
+    public function getUser()
+    {
+        // Check if user is logged in
+        if (isset($_SESSION['nicehalf_auth_user'])) {
+            return $_SESSION['nicehalf_auth_user'];
+        }
+
+        return null;
     }
 }

@@ -15,9 +15,6 @@ namespace Nicehalf\Api;
 // Use
 use ZipArchive;
 
-// Exit if accessed directly
-if (!defined('ABSPATH')) exit;
-
 // Constants
 define('NICEHALF_API_DEBUG', false);
 define('NICEHALF_SHOW_UPDATE_PROGRESS', true);
