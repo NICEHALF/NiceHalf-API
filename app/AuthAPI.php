@@ -7,7 +7,6 @@
  * @version     1.0.0
  * @author      Nicehalf
  * @link        https://nicehalf.com
- * @license     https://nicehalf.com/license
  */
 
 // Namespace
@@ -26,6 +25,12 @@ class AuthAPI
      */
     private $api_url = 'https://nicehalf.com/api/auth';
 
+
+    /**
+     * Auth API constructor
+     *
+     * @return void
+     */
     public function __construct()
     {
         // save the current page full url
@@ -38,11 +43,16 @@ class AuthAPI
 
         // redirect to login page if not logged in
         if (!isset($_SESSION['nicehalf_auth_token'])) {
-            $this->redirect($this->api_url . '?redirect=' . $current_page_url);
+            return $this->redirect($this->api_url . '?redirect=' . $current_page_url);
         }
 
         // check if the token is valid
         $this->checkToken();
+
+        // redirect to login page if not logged in
+        if (!isset($_SESSION['nicehalf_auth_token'])) {
+            return $this->redirect($this->api_url . '?redirect=' . $current_page_url);
+        }
     }
 
     /**
@@ -91,7 +101,7 @@ class AuthAPI
     private function checkToken()
     {
         // Token
-        $token = $_SESSION['nicehalf_auth_token'];
+        $token = $_GET['token'] ?? $_SESSION['nicehalf_auth_token'] ?? null;
 
         // Check token
         $check_token = $this->apiRequest('check-token', ['token' => $token]);
@@ -115,6 +125,9 @@ class AuthAPI
         if (isset($_SESSION['current_page_url'])) {
             $this->redirect($_SESSION['current_page_url']);
         }
+
+        // Unset current page url
+        unset($_SESSION['current_page_url']);
 
         // redirect to home page
         $this->redirect('/');
