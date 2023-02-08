@@ -23,15 +23,15 @@ class AuthAPI
      *
      * @var string
      */
-    private $api_url = 'https://nicehalf.com/api/auth';
+    private $api_url = 'https://saas.com/nicehalf/public/api/auth';
 
 
     /**
-     * Auth API constructor
+     * Auth API
      *
      * @return void
      */
-    public function __construct()
+    public function auth()
     {
         // save the current page full url
         $current_page_url = $this->getCurrentPageURL();
@@ -101,7 +101,16 @@ class AuthAPI
     private function checkToken()
     {
         // Token
-        $token = $_GET['token'] ?? $_SESSION['nicehalf_auth_token'] ?? null;
+        $token = isset($_GET['token']) ? $_GET['token'] : (isset($_SESSION['nicehalf_auth_token']) ? $_SESSION['nicehalf_auth_token'] : null);
+
+        // Check if token is not set
+        if (!$token) {
+            // Destroy session
+            session_destroy();
+
+            // Redirect to login page
+            $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
+        }
 
         // Check token
         $check_token = $this->apiRequest('check-token', ['token' => $token]);
