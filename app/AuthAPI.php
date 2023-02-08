@@ -24,7 +24,7 @@ class AuthAPI
      *
      * @var string
      */
-    private $api_url = 'https://saas.com/nicehalf/public/auth/api';
+    private $api_url = 'https://nicehalf.com/api/auth';
 
     public function __construct()
     {
