@@ -20,8 +20,7 @@ class AuthAPI
      *
      * @var string
      */
-    private $api_url = 'https://saas.com/nicehalf/public/api/auth';
-
+    private $api_url = 'https://nicehalf.com/api/auth';
 
     /**
      * Auth API
