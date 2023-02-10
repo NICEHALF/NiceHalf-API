@@ -7,7 +7,7 @@
  * just include this file in your project and use the functions.
  * 
  * @package     Nicehalf License API
- * @version     1.0.1
+ * @version     1.1.0
  * @author      Nicehalf
  * @link        https://nicehalf.com
  */

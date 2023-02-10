@@ -7,7 +7,7 @@
  * just include this file in your project and use the functions.
  * 
  * @package     Nicehalf CRUD API
- * @version     1.0.1
+ * @version     1.1.0
  * @author      Nicehalf
  * @link        https://nicehalf.com
  */
@@ -46,13 +46,16 @@ class CrudAPI
     }
 
     /**
-     * Get all records
+     * Get rows
      * 
      * @param string $table
      * @param array $params
+     * @param array $order_by
+     * @param int $limit
+     * @param int $offset
      * @return array
      */
-    public function getAll($table, $where = [], $order_by = [], $limit = null, $offset = null)
+    public function get_rows($table, $where = [], $order_by = [], $limit = null, $offset = null)
     {
         $params = [
             'table' => $table,
@@ -66,13 +69,13 @@ class CrudAPI
     }
 
     /**
-     * Get one record
+     * Get one row
      * 
      * @param string $table
      * @param array $where
      * @return array
      */
-    public function getOne($table, $where = [])
+    public function get_row($table, $where = [])
     {
         $params = [
             'table' => $table,
