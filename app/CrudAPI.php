@@ -163,9 +163,9 @@ class CrudAPI
         $headers = [
             'Content-Type: application/x-www-form-urlencoded',
             'Content-Length: ' . strlen($params),
-            'NICEHALF-CRUD-API-URL: ' . $url,
-            'NICEHALF-CRUD-API-KEY: ' . $this->api_key,
-            'NICEHALF-CRUD-API-METHOD: ' . $method,
+            'NICEHALF-API-URL: ' . $url,
+            'NICEHALF-API-KEY: ' . $this->api_key,
+            'NICEHALF-API-METHOD: ' . $method,
         ];
 
         // Set request options
