@@ -8,7 +8,7 @@
  * you need to change only session() and redirect() functions
  * 
  * @package     Nicehalf License API
- * @version     1.1.1
+ * @version     1.1.1 (2023-02-10)
  * @author      Nicehalf
  * @link        https://nicehalf.com
  */
