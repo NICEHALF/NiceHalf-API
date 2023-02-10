@@ -7,7 +7,7 @@
  * just include this file in your project and use the functions.
  * 
  * @package     Nicehalf CRUD API
- * @version     1.1.0
+ * @version     1.1.1
  * @author      Nicehalf
  * @link        https://nicehalf.com
  */
