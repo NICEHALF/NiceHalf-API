@@ -3,6 +3,10 @@
 /**
  * Nicehalf Auth API
  *
+ * Works only with Laravel, 
+ * if you want to use it with other framework, 
+ * you need to change only session() and redirect() functions
+ * 
  * @package     Nicehalf License API
  * @version     1.0.0
  * @author      Nicehalf
@@ -30,10 +34,15 @@ class AuthAPI
     public function auth()
     {
         $current_page_url = $this->getCurrentPageURL();
+        $website_url = $this->getWebsiteURL();
 
         // save the current page url without query string if exists in session (for redirect after login)
-        if (!isset($_SESSION['current_page_url'])) {
-            $_SESSION['current_page_url'] = $current_page_url;
+        if (!session()->has('current_page_url')) {
+            session(['current_page_url' => $current_page_url]);
+        }
+
+        if (!session()->has('website_url')) {
+            session(['website_url' => $website_url]);
         }
 
         // Check if token is set
@@ -43,10 +52,14 @@ class AuthAPI
         }
 
         // check if user is logged in
-        if (isset($_SESSION['nicehalf_auth_user'])) {
-            print_r($_SESSION['nicehalf_auth_user']);
-            return;
+        if (session()->has('nicehalf_auth_user')) {
+            // Log user 
+            session(['nicehalf_auth_user' => $this->getUser()]);
+
+            // redirect to home page
+            return redirect()->route('home')->with('success', 'Successfully logged in');
         }
+
 
         // Redirect to login page
         return $this->redirect($this->api_url . '?redirect=' . $current_page_url);
@@ -61,7 +74,7 @@ class AuthAPI
 
     private function redirect($url)
     {
-        return header('Location: ' . $url);
+        return redirect()->away($url);
     }
 
     /**
@@ -89,6 +102,25 @@ class AuthAPI
     }
 
     /**
+     * Get website URL
+     * 
+     * @return string
+     */
+
+    private function getWebsiteURL()
+    {
+        // get base url
+        $url = url('/');
+
+        // remove last slash if exists
+        if (substr($url, -1) == '/') {
+            $url = substr($url, 0, -1);
+        }
+
+        return $url;
+    }
+
+    /**
      * Check token
      * 
      * @return void
@@ -102,7 +134,7 @@ class AuthAPI
         // Check if token is not set
         if (!$token) {
             // Destroy session
-            session_destroy();
+            session()->flush();
 
             // Redirect to login page
             return $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
@@ -114,19 +146,20 @@ class AuthAPI
         // Check if token is valid
         if ($check_token['status'] != 'success') {
             // Destroy session
-            session_destroy();
+            session()->flush();
 
             // Redirect to login page
             return $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
         }
 
         // Save user data in session
-        $_SESSION['nicehalf_auth_user'] = $check_token['user'];
+        session(['nicehalf_auth_user' => $check_token['user']]);
 
-        // redirect to current page url without query string if exists
-        if (isset($_SESSION['current_page_url'])) {
-            $url = $_SESSION['current_page_url'];
-            unset($_SESSION['current_page_url']);
+        // redirect to current page
+        if (session()->has('current_page_url')) {
+            $url = session('website_url');
+            session()->forget('current_page_url');
+            session()->forget('website_url');
             return $this->redirect($url);
         }
 
@@ -167,10 +200,10 @@ class AuthAPI
     public function logout()
     {
         // Destroy session
-        session_destroy();
+        session()->flush();
 
         // Redirect to login page
-        return $this->redirect($this->api_url . '?redirect=' . $this->getCurrentPageURL());
+        return redirect()->route('home')->with('success', 'Successfully logged out');
     }
 
     /**
@@ -182,8 +215,8 @@ class AuthAPI
     public function getUser()
     {
         // Check if user is logged in
-        if (isset($_SESSION['nicehalf_auth_user'])) {
-            return $_SESSION['nicehalf_auth_user'];
+        if (session()->has('nicehalf_auth_user')) {
+            return session('nicehalf_auth_user');
         }
 
         return null;
