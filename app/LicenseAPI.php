@@ -3,8 +3,11 @@
 /**
  * Nicehalf License API
  *
+ * Works with any PHP framework,
+ * just include this file in your project and use the functions.
+ * 
  * @package     Nicehalf License API
- * @version     1.0.0
+ * @version     1.0.1
  * @author      Nicehalf
  * @link        https://nicehalf.com
  */
